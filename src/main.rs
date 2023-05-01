@@ -1,5 +1,9 @@
 //! A simple application to find and replace emails in changelogs with GitHub usernames.
 
+mod cli;
+mod db;
+mod emails;
+
 use std::fs;
 
 use anyhow::Context;
@@ -7,15 +11,12 @@ use once_cell::sync::OnceCell;
 
 use crate::db::{GithubUser, GithubUserRepository};
 
-mod cli;
-mod db;
-mod emails;
-
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = <cli::Args as clap::Parser>::parse();
 
     let pool = db::create_pool(args.database).await?;
+    db::run_migrations(&pool).await?;
     let user_repository = GithubUserRepository::new(pool);
 
     let input = read_input(args.input_file.as_ref())?;

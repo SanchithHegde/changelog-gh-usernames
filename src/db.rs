@@ -70,3 +70,12 @@ pub(crate) async fn create_pool(database_uri: impl AsRef<str>) -> anyhow::Result
         .await
         .context("Failed to access database")
 }
+
+/// Run database migrations
+pub(crate) async fn run_migrations(pool: &SqlitePool) -> anyhow::Result<()> {
+    static MIGRATOR: sqlx::migrate::Migrator = sqlx::migrate!();
+    MIGRATOR
+        .run(pool)
+        .await
+        .context("Failed to run database migrations")
+}
