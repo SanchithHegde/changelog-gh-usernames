@@ -26,36 +26,45 @@ async fn main() -> anyhow::Result<()> {
     let client = OnceCell::new();
     let mut unavailable_emails = Vec::with_capacity(emails.len());
     for email in emails {
-        // TODO: Add support deducing usernames from no-reply GitHub emails
-
-        // Retrieve username from database if available, query GitHub API otherwise.
-        let db_user = user_repository.get(&email).await?;
-        let username = if let Some(user) = db_user {
-            Some(user.username)
+        let username = if let Some(prefix) = email.strip_suffix("@users.noreply.github.com") {
+            // GitHub no-reply email address
+            // Format: 1234567+GitHubUsername@users.noreply.github.com
+            if let Some((_, username)) = prefix.split_once('+') {
+                Some(username.to_owned())
+            } else {
+                unavailable_emails.push(email.clone());
+                None
+            }
         } else {
-            // Construct GitHub client only when absolutely necessary
-            let users =
-                search_user_by_email(client.get_or_try_init(construct_client)?, &email).await?;
+            // Retrieve username from database if available, query GitHub API otherwise.
+            let db_user = user_repository.get(&email).await?;
+            if let Some(user) = db_user {
+                Some(user.username)
+            } else {
+                // Construct GitHub client only when absolutely necessary
+                let users =
+                    search_user_by_email(client.get_or_try_init(construct_client)?, &email).await?;
 
-            // This shouldn't ideally happen, since GitHub does not allow two accounts to be linked
-            // with the same email address.
-            anyhow::ensure!(
-                users.total_count == 1,
-                "More than one user found for {email}"
-            );
+                // This shouldn't ideally happen, since GitHub does not allow two accounts to be linked
+                // with the same email address.
+                anyhow::ensure!(
+                    users.total_count == 1,
+                    "More than one user found for {email}"
+                );
 
-            match users.items.first() {
-                None => {
-                    unavailable_emails.push(email.clone());
-                    None
-                }
-                Some(user) => {
-                    let username = user.login.clone();
+                match users.items.first() {
+                    None => {
+                        unavailable_emails.push(email.clone());
+                        None
+                    }
+                    Some(user) => {
+                        let username = user.login.clone();
 
-                    let user = GithubUser::new(email.clone(), username.clone());
-                    user_repository.insert(user).await?;
+                        let user = GithubUser::new(email.clone(), username.clone());
+                        user_repository.insert(user).await?;
 
-                    Some(username)
+                        Some(username)
+                    }
                 }
             }
         };
