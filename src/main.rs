@@ -48,7 +48,7 @@ async fn main() -> anyhow::Result<()> {
                 // This shouldn't ideally happen, since GitHub does not allow two accounts to be linked
                 // with the same email address.
                 anyhow::ensure!(
-                    users.total_count == 1,
+                    users.total_count <= 1,
                     "More than one user found for {email}"
                 );
 
