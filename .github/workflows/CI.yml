@@ -25,7 +25,25 @@ env:
   CARGO_REGISTRIES_CRATES_IO_PROTOCOL: sparse
 
 jobs:
+  formatting:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab # v3.5.2
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@52e69531e6f69a396bc9d1226284493a5db969ff # v1
+        with:
+          toolchain: nightly
+          components: rustfmt
+
+      - name: Check formatting
+        shell: bash
+        run: cargo +nightly fmt -- --check
+
   check:
+    name: Check compilation
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -54,10 +72,6 @@ jobs:
           sed -i 's/"-Wmissing_docs",/# "-Wmissing_docs",/' .cargo/config.toml
 
       - uses: Swatinem/rust-cache@6fd3edff6979b79f87531400ad694fb7f2c84b1f # v2.2.1
-
-      - name: Check formatting
-        shell: bash
-        run: cargo fmt -- --check
 
       - name: Clippy
         shell: bash
