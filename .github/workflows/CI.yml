@@ -47,9 +47,11 @@ jobs:
         with:
           toolchain: stable
 
-      # - name: Deny warnings
-      #   shell: bash
-      #   run: sed -i 's/rustflags = \[/rustflags = \[\n    "-Dwarnings",/' .cargo/config.toml
+      - name: Deny warnings
+        shell: bash
+        run: |
+          sed -i 's/rustflags = \[/rustflags = \[\n    "-Dwarnings",/' .cargo/config.toml
+          sed -i 's/"-Wmissing_docs",/# "-Wmissing_docs",/' .cargo/config.toml
 
       - uses: Swatinem/rust-cache@6fd3edff6979b79f87531400ad694fb7f2c84b1f # v2.2.1
 
