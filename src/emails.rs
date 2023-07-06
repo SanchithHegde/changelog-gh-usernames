@@ -1,5 +1,7 @@
 //! Utilities to find emails in the provided input text.
 
+use std::collections::HashSet;
+
 /// Regex used to search for email addresses in the provided input.
 static EMAIL_REGEX: once_cell::sync::Lazy<regex::Regex> = once_cell::sync::Lazy::new(|| {
     #[allow(clippy::expect_used)] // No point in proceeding if the email search regex is itself invalid
@@ -11,7 +13,7 @@ static EMAIL_REGEX: once_cell::sync::Lazy<regex::Regex> = once_cell::sync::Lazy:
 });
 
 /// Returns a list of identified email addresses in the provided input text.
-pub(crate) fn find_emails(input: impl AsRef<str>) -> Vec<String> {
+pub(crate) fn find_emails(input: impl AsRef<str>) -> HashSet<String> {
     EMAIL_REGEX
         .captures_iter(input.as_ref())
         .map(|capture| {
