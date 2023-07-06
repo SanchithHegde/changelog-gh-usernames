@@ -30,7 +30,13 @@ async fn main() -> anyhow::Result<()> {
             // GitHub no-reply email address
             // Format: 1234567+GitHubUsername@users.noreply.github.com
             if let Some((_, username)) = prefix.split_once('+') {
-                Some(username.to_owned())
+                // GitHub bot email address
+                // Format: 1234567+dependabot[bot]@users.noreply.github.com
+                if let Some(bot_username) = username.strip_suffix("[bot]") {
+                    Some(bot_username.to_owned())
+                } else {
+                    Some(username.to_owned())
+                }
             } else {
                 unavailable_emails.push(email.clone());
                 None
