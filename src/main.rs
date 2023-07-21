@@ -15,7 +15,7 @@ use crate::{
     pull_request::PullRequest,
 };
 
-#[tokio::main]
+#[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
     let args = <cli::Args as clap::Parser>::parse();
 
@@ -214,6 +214,7 @@ async fn search_user_by_email(
         )
         .await
         .context("Failed to search for GitHub user by email address")
+        .map(|response| response.body)
 }
 
 /// Find the GitHub user who authored the specified pull request.
@@ -232,6 +233,7 @@ async fn get_pr_author(
         .context(format!(
             "Failed to obtain pull request information: {pull_request:?}"
         ))?
+        .body
         .user
         .ok_or_else(|| {
             anyhow::anyhow!("The author information for the specified pull request is unavailable")
