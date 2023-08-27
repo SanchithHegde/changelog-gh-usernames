@@ -5,7 +5,7 @@ static PULL_REQUEST_LINK_REGEX: once_cell::sync::Lazy<regex::Regex> = once_cell:
         // No point in proceeding if the email search regex is itself invalid
         regex::Regex::new(
             // Reference: https://stackoverflow.com/a/59082561
-            r#"github\.com/(?P<owner>[\w.-]+)/(?P<repository>[\w.-]+)/pull/(?P<pull_request_number>\d+)"#,
+            r"github\.com/(?P<owner>[\w.-]+)/(?P<repository>[\w.-]+)/pull/(?P<pull_request_number>\d+)",
         )
         .expect("Invalid pull request regex")
     },
