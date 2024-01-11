@@ -1,5 +1,11 @@
 # changelog-gh-usernames
 
+> [!NOTE]
+> This project is no longer being maintained and has been archived.
+> Moreover, `git-cliff` now includes support for obtaining GitHub username
+> information from commits, so I don't see the need to maintain this tool
+> anymore.
+
 A simple application to find and replace emails in changelogs with GitHub
 usernames.
 This was developed to work with [`git-cliff`][git-cliff], but it should be easy
